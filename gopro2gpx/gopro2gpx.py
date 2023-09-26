@@ -180,6 +180,8 @@ def parseArgs():
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--verbose", help="increase output verbosity", action="count")
     parser.add_argument("-b", "--binary", help="read data from bin file", action="store_true")
+    parser.add_argument("-c", "--csv", help="Generate also CSV file", action="store_true", default=False)
+    parser.add_argument("-k", "--kml", help="Generate also KML file", action="store_true", default=False)
     parser.add_argument("-s", "--skip", help="Skip bad points (GPSFIX=0)", action="store_true", default=False)
     parser.add_argument("--skip-dop", help="Skip high Dilution of Precision points (GPSP>X)", action="store_true", default=False)
     parser.add_argument("--dop-limit", help="Dilution of Precision limit", default=2000, type=int)
@@ -220,13 +222,15 @@ def main_core(args):
         print("Can't create file. No GPS info in %s. Exitting" % args.files)
         sys.exit(0)
 
-    #kml = gpshelper.generate_KML(points)
-    #with open("%s.kml" % args.outputfile , "w+") as fd:
-    #    fd.write(kml)
-
-    #csv = gpshelper.generate_CSV(points)
-    #with open("%s.csv" % args.outputfile , "w+") as fd:
-    #    fd.write(csv)
+    if args.kml:
+        kml = gpshelper.generate_KML(points)
+        with open("%s.kml" % args.outputfile , "w+") as fd:
+            fd.write(kml)
+    
+    if args.csv:
+        csv = gpshelper.generate_CSV(points)
+        with open("%s.csv" % args.outputfile , "w+") as fd:
+            fd.write(csv)
 
     gpx = gpshelper.generate_GPX(points, start_time, trk_name=device_name)
     with open("%s.gpx" % args.outputfile , "w+") as fd:
