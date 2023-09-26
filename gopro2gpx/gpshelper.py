@@ -187,16 +187,8 @@ def generate_KML(gps_points):
 
 
 def generate_CSV(gps_points):
-    csv_template = """DashWare GPX CSV File
-Time,Latitude,Longitude,Elevation,AirTemp,HeartRate,Cadence,Power,Roll,Pitch
-%s"""
-
-
-    lines = []
+    lines = ['DashWare GPX CSV File', 'Time,Latitude,Longitude,Elevation,AirTemp,HeartRate,Cadence,Power,Roll,Pitch']
     for p in gps_points:
-        s = "%s,%s,%s,%s,%s" % (CSVTime(p.time), p.latitude, p.longitude, p.elevation, ',,,,,')
+        s = "{0},{1},{2},{3},{4}".format(CSVTime(p.time), p.latitude, p.longitude, p.elevation, ',,,,,')
         lines.append(s)
-
-    coords = os.linesep.join(lines)
-    csv = csv_template % coords
-    return(csv)
+    return(lines)

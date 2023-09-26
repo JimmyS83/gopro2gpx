@@ -230,7 +230,8 @@ def main_core(args):
     if args.csv:
         csv = gpshelper.generate_CSV(points)
         with open("%s.csv" % args.outputfile , "w+") as fd:
-            fd.write(csv)
+            for line in csv:
+                fd.write("{0}\n".format(line))
 
     gpx = gpshelper.generate_GPX(points, start_time, trk_name=device_name)
     with open("%s.gpx" % args.outputfile , "w+") as fd:
