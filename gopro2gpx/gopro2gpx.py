@@ -25,6 +25,7 @@ from .ffmpegtools import FFMpegTools
 from . import fourCC
 from . import gpmf
 from . import gpshelper
+from . import highlights
 
 
 def BuildGPSPoints(data, skip=False, skipDop=False, dopLimit=2000):
@@ -185,56 +186,72 @@ def parseArgs():
     parser.add_argument("-s", "--skip", help="Skip bad points (GPSFIX=0)", action="store_true", default=False)
     parser.add_argument("--skip-dop", help="Skip high Dilution of Precision points (GPSP>X)", action="store_true", default=False)
     parser.add_argument("--dop-limit", help="Dilution of Precision limit", default=2000, type=int)
-    parser.add_argument("files", help="Video file or binary metadata dump", nargs='*')
-    parser.add_argument("outputfile", help="output file. builds KML and GPX")
+    parser.add_argument("file", help="Video file or binary metadata dump")
     args = parser.parse_args()
 
     return args
 
 def main_core(args):
     config = setup_environment(args)
-    files = args.files
-    output_file = args.outputfile
+    file = args.file
     points = []
     start_time = None
+    hilights = False
     ffmpegtools = FFMpegTools(ffprobe=config.ffprobe_cmd, ffmpeg=config.ffmpeg_cmd)
     data = []
-    for num, filename in enumerate(files):
-        reader = gpmf.GpmfFileReader(ffmpegtools, verbose=config.verbose)
 
-        if not args.binary:
-            raw_data = reader.readRawTelemetryFromMP4(filename)
-        else:
-            raw_data = reader.readRawTelemetryFromBinary(filename)
+    hilights = highlights.examine_mp4(file)  # examine each file
+    if hilights:
+        str2insert = ""
+        str2insert += file + "\n"
+        
+        for highlight in hilights:
+            str2insert += 'Time: {0} Lat,Lon {2},{1} Altitude {3}\n'.format(highlight[0], highlight[1], highlight[2], highlight[3])
 
-        if config.verbose == 2:
-            binary_filename = output_file + '.%02d.bin' % (num)
-            print("Creating output file for binary data: %s" % binary_filename)
-            f = open(binary_filename, "wb")
-            f.write(raw_data)
-            f.close()
+        # Create document
+        stripPath, _ = os.path.splitext(file)
+        outpFold, newFName = os.path.split(stripPath)
+        newPath = os.path.join(outpFold, newFName + '_Hilights' + '.txt')
+        with open(newPath, "w") as f:
+            f.write(str2insert)
+        print("Saved Highlights under: \"" + newPath + "\"")
+    
+    
+    reader = gpmf.GpmfFileReader(ffmpegtools, verbose=config.verbose)
 
-        data += gpmf.parseStream(raw_data, config.verbose)
+    if not args.binary:
+        raw_data = reader.readRawTelemetryFromMP4(file)
+    else:
+        raw_data = reader.readRawTelemetryFromBinary(file)
 
+    if config.verbose == 2:
+        binary_filename = file + '.%02d.bin' % (num)
+        print("Creating output file for binary data: %s" % binary_filename)
+        f = open(binary_filename, "wb")
+        f.write(raw_data)
+        f.close()
+
+    data += gpmf.parseStream(raw_data, config.verbose)
+    
     points, start_time, device_name = BuildGPSPoints(data, skip=args.skip, skipDop=args.skip_dop, dopLimit=args.dop_limit)
 
     if len(points) == 0:
         print("Can't create file. No GPS info in %s. Exitting" % args.files)
         sys.exit(0)
-
+    
     if args.kml:
         kml = gpshelper.generate_KML(points)
-        with open("%s.kml" % args.outputfile , "w+") as fd:
+        with open("{0}.kml".format(os.path.splitext(file)[0]) , "w+") as fd:
             fd.write(kml)
     
     if args.csv:
         csv = gpshelper.generate_CSV(points)
-        with open("%s.csv" % args.outputfile , "w+") as fd:
+        with open("{0}.csv".format(os.path.splitext(file)[0]), "w+") as fd:
             for line in csv:
                 fd.write("{0}\n".format(line))
 
-    gpx = gpshelper.generate_GPX(points, start_time, trk_name=device_name)
-    with open("%s.gpx" % args.outputfile , "w+") as fd:
+    gpx = gpshelper.generate_GPX(points, start_time, trk_name=device_name, highlights=hilights)
+    with open("{0}.gpx".format(os.path.splitext(file)[0]), "w+") as fd:
         fd.write(gpx)
 
 def main():

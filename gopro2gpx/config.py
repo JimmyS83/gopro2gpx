@@ -42,7 +42,7 @@ class Config:
 
 
 def setup_environment(args):
-    config = Config(verbose=args.verbose, outputfile=args.outputfile)
+    config = Config(verbose=args.verbose, outputfile=args.file)
     config.load_config_file()
 
     return config
