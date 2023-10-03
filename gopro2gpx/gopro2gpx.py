@@ -199,7 +199,6 @@ def main_core(args):
     hilights = False
     ffmpegtools = FFMpegTools(ffprobe=config.ffprobe_cmd, ffmpeg=config.ffmpeg_cmd)
     data = []
-
     hilights = highlights.examine_mp4(file)  # examine each file
     if hilights:
         str2insert = ""

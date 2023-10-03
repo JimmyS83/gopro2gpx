@@ -23,19 +23,22 @@ def find_boxes(f, start_offset=0, end_offset=float("inf")):
 
     Specify a start_offset and end_offset to read sub-boxes.
     """
-    s = struct.Struct("> I 4s")
-    boxes = {}
-    offset = start_offset
-    f.seek(offset, 0)
-    while offset < end_offset:
-        data = f.read(8)  # read box header
-        if data == b"": break  # EOF
-        length, text = s.unpack(data)
-        f.seek(length - 8, 1)  # skip to next box
-        boxes[text] = (offset, offset + length)
-        #print(data, boxes[text])
-        offset += length
-    return boxes
+    try:
+        s = struct.Struct("> I 4s")
+        boxes = {}
+        offset = start_offset
+        f.seek(offset, 0)
+        while offset < end_offset:
+            data = f.read(8)  # read box header
+            if data == b"": break  # EOF
+            length, text = s.unpack(data)
+            f.seek(length - 8, 1)  # skip to next box
+            boxes[text] = (offset, offset + length)
+            #print(data, boxes[text])
+            offset += length
+        return boxes
+    except:
+        return False
 
 
 def examine_mp4(filename):
@@ -66,13 +69,15 @@ def examine_mp4(filename):
         if not klvs: return False
         
         highlights = parse_highlights(klvs)
-
-        print("")
-        print("Filename:", filename)
-        print("Found", len(highlights), "Highlight(s)!")
-        print('Here are all Highlights: ', highlights)
-
-        return highlights
+        
+        if highlights:
+            print("")
+            print("Filename:", filename)
+            print("Found", len(highlights), "Highlight(s)!")
+            print('Here are all Highlights: ', highlights)
+            return highlights
+        else:
+            return False
 
 
 def parse_klvs(f, start_offset=0, end_offset=float("inf")):
@@ -107,11 +112,15 @@ def parse_highlights(klvs): # Parse the highlights from the KLVs
     # The scale for the highlight data is: "SCAL": [1, 1, 1, 10000000, 10000000, 1, 1, 1, 1]
     # Elements are:  Time (ms), in (ms), out (ms), Location XYZ (deg,deg,m), Type, Confidence (%) Score
     
+    
     highlight_klvs = klvs[0].data    # vypsani pole, v poslednim prvku jsou Highlights
     highlights = []
-    for hlght in highlight_klvs:
-        highlights.append([sec2dtime(hlght.time/1000), hlght.lat/10000000, hlght.lon/10000000, hlght.alt])
-    return highlights
+    try:
+        for hlght in highlight_klvs:
+            highlights.append([sec2dtime(hlght.time/1000), hlght.lat/10000000, hlght.lon/10000000, hlght.alt])
+        return highlights
+    except:     # HLMT found, but has wrong data
+        return False
 
 
 def sec2dtime(secs):
