@@ -74,7 +74,7 @@ def examine_mp4(filename):
             print("")
             print("Filename:", filename)
             print("Found", len(highlights), "Highlight(s)!")
-            print('Here are all Highlights: ', highlights)
+            #print('Here are all Highlights: ', highlights)
             return highlights
         else:
             return False

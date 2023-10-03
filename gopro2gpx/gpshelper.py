@@ -95,7 +95,7 @@ def generate_GPX(points, start_time=None, trk_name="exercise", highlights=False)
     if highlights:
         for num, wpt in enumerate(highlights):
             way_pts = ' <wpt lat="%s" lon="%s">\r\n' % (wpt[2], wpt[1])
-            way_pts += '    <name>{0}</name>\r\n'.format('Hilight #{0}'.format(num))
+            way_pts += '    <name>{0} ({1})</name>\r\n'.format('Hilight #{0}'.format(num), wpt[0])
             way_pts += '</wpt>\r\n'
             xml += way_pts
 

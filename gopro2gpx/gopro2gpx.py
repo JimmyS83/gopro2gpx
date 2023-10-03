@@ -9,15 +9,15 @@
 
 
 import argparse
-import array
+#import array
 import os
-import platform
-import re
-import struct
-import subprocess
+#import platform
+#import re
+#import struct
+#import subprocess
 import sys
-import time
-from collections import namedtuple
+#import time
+#from collections import namedtuple
 import datetime
 
 from .config import setup_environment
