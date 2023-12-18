@@ -20,12 +20,12 @@ import sys
 #from collections import namedtuple
 import datetime
 
-from .config import setup_environment
-from .ffmpegtools import FFMpegTools
-from . import fourCC
-from . import gpmf
-from . import gpshelper
-from . import highlights
+from config import setup_environment
+from ffmpegtools import FFMpegTools
+import fourCC
+import gpmf
+import gpshelper
+import highlights
 
 
 def BuildGPSPoints(data, skip=False, skipDop=False, dopLimit=2000):

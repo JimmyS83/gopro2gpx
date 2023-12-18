@@ -14,7 +14,7 @@ import os
 import sys
 import struct
 from math import floor
-from .klvdata import KLVData
+from klvdata import KLVData
 
 
 def find_boxes(f, start_offset=0, end_offset=float("inf")):

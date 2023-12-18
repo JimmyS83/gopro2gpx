@@ -17,7 +17,7 @@ import os
 #import struct
 #import sys
 
-from .klvdata import KLVData
+from klvdata import KLVData
 
 
 class GpmfFileReader:

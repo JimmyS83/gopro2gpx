@@ -1,3 +1,3 @@
-from .gopro2gpx import main
+import main
 
 #main()
